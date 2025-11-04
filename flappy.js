@@ -1,11 +1,10 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
- 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
- 
+// Ảnh
 const birdImg = new Image();
 birdImg.src = 'https://i.postimg.cc/9fbH08k9/image.png';
 
@@ -15,14 +14,14 @@ pipeImg.src = 'https://i.postimg.cc/K8FZYMYs/image.png';
 const bgImg = new Image();
 bgImg.src = 'https://i.postimg.cc/x8M2ffV2/image.png';
 
- 
+// Âm thanh
 const flapSound = new Audio('sounds/flap.wav');
 const hitSound = new Audio('sounds/hit.wav');
 
- 
+// Chim
 let bird = { 
   x: 100, 
-  y: canvas.height/2, 
+  y: canvas.height / 3, 
   width: 50, 
   height: 36, 
   gravity: 0.6, 
@@ -30,27 +29,28 @@ let bird = {
   velocity: 0 
 };
 
+// Trò chơi
 let pipes = [];
 let frame = 0;
 let score = 0;
 let speed = 2;
 let gameOverFlag = false;
 
- 
+// Hàm tạo ống
 function createPipe() {
-  let top = Math.random() * (canvas.height/2) + 50;
+  let top = Math.random() * (canvas.height / 2) + 50;
   let gap = 150;
   let bottom = canvas.height - top - gap;
   pipes.push({ x: canvas.width, top: top, bottom: bottom, width: 80 });
 }
 
- 
+// Vẽ chim
 function drawBird() {
   ctx.save();
-  ctx.translate(bird.x + bird.width/2, bird.y + bird.height/2);
+  ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
   let angle = Math.min(Math.max(bird.velocity / 10, -0.5), 0.5);
   ctx.rotate(angle);
-  ctx.drawImage(birdImg, -bird.width/2, -bird.height/2, bird.width, bird.height);
+  ctx.drawImage(birdImg, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
   ctx.restore();
 }
 
@@ -62,23 +62,25 @@ function drawPipes() {
   }
 }
 
- 
+// Vẽ nền
 function drawBackground() {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 }
 
- 
+// Vẽ màn Game Over
 function drawGameOver() {
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'white';
   ctx.font = '64px Arial';
-  ctx.fillText("Game Over", canvas.width/2 - 160, canvas.height/2);
+  ctx.fillText("Game Over", canvas.width / 2 - 160, canvas.height / 2);
   ctx.font = '32px Arial';
-  ctx.fillText("Score: " + score, canvas.width/2 - 60, canvas.height/2 + 50);
+  ctx.fillText("Score: " + score, canvas.width / 2 - 60, canvas.height / 2 + 50);
+  ctx.font = '24px Arial';
+  ctx.fillText("Press SPACE to restart", canvas.width / 2 - 150, canvas.height / 2 + 100);
 }
 
- 
+// Cập nhật trò chơi
 function update() {
   if (gameOverFlag) return;
 
@@ -86,7 +88,7 @@ function update() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame % 90 === 0) createPipe();
+  if (frame > 60 && frame % 90 === 0) createPipe(); // tạo ống sau 1s
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -109,14 +111,14 @@ function update() {
     }
   }
 
- 
+  // Chim chạm đất hoặc bay quá cao
   if (bird.y + bird.height > canvas.height || bird.y < 0) {
     hitSound.play();
     gameOverFlag = true;
   }
 }
 
- 
+// Vẽ khung hình
 function draw() {
   drawBackground();
   drawPipes();
@@ -127,51 +129,67 @@ function draw() {
   if (gameOverFlag) drawGameOver();
 }
 
- 
 let loopId;
 function loop() {
   update();
   draw();
   loopId = requestAnimationFrame(loop);
 }
- function startGame() {
-  loop();
-}
 
- 
-let loaded = 0;
-const totalAssets = 3;
-
-function checkLoaded() {
-  loaded++;
-  if (loaded === totalAssets) {
-    startGame();
-  }
-}
-
-birdImg.onload = checkLoaded;
-pipeImg.onload = checkLoaded;
-bgImg.onload = checkLoaded;
-
-
- 
+// Bay lên
 function flap() {
   bird.velocity = bird.lift;
   flapSound.play();
 }
 
+// Reset game
+function resetGame() {
+  bird.y = canvas.height / 3;
+  bird.velocity = 0;
+  pipes = [];
+  score = 0;
+  speed = 2;
+  frame = 0;
+  gameOverFlag = false;
+}
+
+// Sự kiện điều khiển
 document.addEventListener('keydown', function(e) {
-  if (e.code === 'Space') flap();
+  if (e.code === 'Space') {
+    if (gameOverFlag) {
+      resetGame();
+    } else {
+      flap();
+    }
+  }
 });
 
 document.addEventListener('touchstart', function(e) {
-  flap();
+  if (gameOverFlag) {
+    resetGame();
+  } else {
+    flap();
+  }
 });
 
- 
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  bird.y = canvas.height / 3;
 });
 
+// Đợi ảnh load xong rồi mới bắt đầu
+function startGame() {
+  loop();
+}
 
+let loaded = 0;
+const totalAssets = 3;
+function checkLoaded() {
+  loaded++;
+  if (loaded === totalAssets) startGame();
+}
+
+birdImg.onload = checkLoaded;
+pipeImg.onload = checkLoaded;
+bgImg.onload = checkLoaded;
