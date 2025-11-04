@@ -120,7 +120,7 @@ function update() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame > 60 && frame % 100 === 0) createPipe();
+  if (frame > 60 && frame % 120 === 0) createPipe();
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -249,3 +249,4 @@ function checkLoaded() {
 birdImg.onload = checkLoaded;
 pipeImg.onload = checkLoaded;
 bgImg.onload = checkLoaded;
+
