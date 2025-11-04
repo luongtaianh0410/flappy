@@ -1,25 +1,25 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Full màn hình
+ 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Load hình ảnh
+ 
 const birdImg = new Image();
-birdImg.src = 'images/bird.png';
+birdImg.src = 'https://i.postimg.cc/9fbH08k9/image.png';
 
 const pipeImg = new Image();
-pipeImg.src = 'images/pipe.png';
+pipeImg.src = 'https://i.postimg.cc/K8FZYMYs/image.png';
 
 const bgImg = new Image();
-bgImg.src = 'images/background.png';
+bgImg.src = 'https://i.postimg.cc/x8M2ffV2/image.png';
 
-// Load âm thanh
+ 
 const flapSound = new Audio('sounds/flap.wav');
 const hitSound = new Audio('sounds/hit.wav');
 
-// Chim
+ 
 let bird = { 
   x: 100, 
   y: canvas.height/2, 
@@ -36,7 +36,7 @@ let score = 0;
 let speed = 2;
 let gameOverFlag = false;
 
-// Tạo ống
+ 
 function createPipe() {
   let top = Math.random() * (canvas.height/2) + 50;
   let gap = 150;
@@ -44,7 +44,7 @@ function createPipe() {
   pipes.push({ x: canvas.width, top: top, bottom: bottom, width: 80 });
 }
 
-// Vẽ chim nghiêng
+ 
 function drawBird() {
   ctx.save();
   ctx.translate(bird.x + bird.width/2, bird.y + bird.height/2);
@@ -62,12 +62,12 @@ function drawPipes() {
   }
 }
 
-// Vẽ nền
+ 
 function drawBackground() {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 }
 
-// Game Over canvas
+ 
 function drawGameOver() {
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -78,7 +78,7 @@ function drawGameOver() {
   ctx.fillText("Score: " + score, canvas.width/2 - 60, canvas.height/2 + 50);
 }
 
-// Cập nhật game
+ 
 function update() {
   if (gameOverFlag) return;
 
@@ -109,14 +109,14 @@ function update() {
     }
   }
 
-  // chim chạm đất hoặc trần
+ 
   if (bird.y + bird.height > canvas.height || bird.y < 0) {
     hitSound.play();
     gameOverFlag = true;
   }
 }
 
-// Vẽ game
+ 
 function draw() {
   drawBackground();
   drawPipes();
@@ -127,7 +127,7 @@ function draw() {
   if (gameOverFlag) drawGameOver();
 }
 
-// Loop
+ 
 let loopId;
 function loop() {
   update();
@@ -136,7 +136,7 @@ function loop() {
 }
 loop();
 
-// Flap chim
+ 
 function flap() {
   bird.velocity = bird.lift;
   flapSound.play();
@@ -150,8 +150,9 @@ document.addEventListener('touchstart', function(e) {
   flap();
 });
 
-// Resize canvas khi thay đổi màn hình
+ 
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
