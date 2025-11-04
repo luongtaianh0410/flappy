@@ -134,7 +134,25 @@ function loop() {
   draw();
   loopId = requestAnimationFrame(loop);
 }
-loop();
+ function startGame() {
+  loop();
+}
+
+ 
+let loaded = 0;
+const totalAssets = 3;
+
+function checkLoaded() {
+  loaded++;
+  if (loaded === totalAssets) {
+    startGame();
+  }
+}
+
+birdImg.onload = checkLoaded;
+pipeImg.onload = checkLoaded;
+bgImg.onload = checkLoaded;
+
 
  
 function flap() {
@@ -155,4 +173,5 @@ window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
 
