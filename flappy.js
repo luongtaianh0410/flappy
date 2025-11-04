@@ -21,26 +21,26 @@ const hitSound = new Audio('sounds/hit.wav');
 // Chim
 let bird = { 
   x: 100, 
-  y: canvas.height / 3, 
+  y: canvas.height / 2, 
   width: 50, 
   height: 36, 
-  gravity: 0.6, 
-  lift: -12, 
+  gravity: 0.35,   // 🪶 rơi chậm hơn (trước là 0.6)
+  lift: -10,       // bay nhẹ nhàng hơn (trước -12)
   velocity: 0 
 };
 
-// Trạng thái game
+// Biến game
 let pipes = [];
 let frame = 0;
 let score = 0;
-let speed = 2;
+let speed = 1.5; // ống di chuyển chậm hơn (trước là 2)
 let gameOverFlag = false;
-let gameStarted = false; // ✅ để chờ bấm Start
+let gameStarted = false; // ✅ chưa bấm Start thì không rơi
 
 // Hàm tạo ống
 function createPipe() {
   let top = Math.random() * (canvas.height / 2) + 50;
-  let gap = 220; // ✅ tăng khoảng cách dễ chơi hơn
+  let gap = 440; // ✅ gấp đôi khoảng cách cũ (220 * 2)
   let bottom = canvas.height - top - gap;
   pipes.push({ x: canvas.width, top: top, bottom: bottom, width: 80 });
 }
@@ -69,15 +69,35 @@ function drawBackground() {
 }
 
 // Vẽ nút Start
-function drawStartButton() {
+function drawStartScreen() {
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'white';
   ctx.font = '64px Arial';
   ctx.fillText("Flappy Bird", canvas.width / 2 - 180, canvas.height / 2 - 80);
   ctx.font = '32px Arial';
-  ctx.fillText("Click or Press SPACE to Start", canvas.width / 2 - 220, canvas.height / 2);
+  ctx.fillText("Click 'Start Game' or Press SPACE", canvas.width / 2 - 230, canvas.height / 2);
+  drawButton();
 }
+
+// Vẽ nút "Start Game"
+function drawButton() {
+  const btnWidth = 200;
+  const btnHeight = 60;
+  const x = canvas.width / 2 - btnWidth / 2;
+  const y = canvas.height / 2 + 60;
+
+  ctx.fillStyle = '#ffcc00';
+  ctx.fillRect(x, y, btnWidth, btnHeight);
+  ctx.fillStyle = 'black';
+  ctx.font = '28px Arial';
+  ctx.fillText("Start Game", x + 25, y + 40);
+
+  // Lưu vùng nút để bắt click
+  startButton = { x, y, width: btnWidth, height: btnHeight };
+}
+
+let startButton = null;
 
 // Vẽ Game Over
 function drawGameOver() {
@@ -100,7 +120,7 @@ function update() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame > 60 && frame % 90 === 0) createPipe();
+  if (frame > 60 && frame % 100 === 0) createPipe();
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -119,7 +139,7 @@ function update() {
     if (!pipe.scored && pipe.x + pipe.width < bird.x) {
       score++;
       pipe.scored = true;
-      if (score % 5 === 0) speed += 0.5;
+      if (score % 5 === 0) speed += 0.2; // tăng tốc nhẹ
     }
   }
 
@@ -134,11 +154,12 @@ function draw() {
   drawBackground();
   drawPipes();
   drawBird();
+
   ctx.fillStyle = 'white';
   ctx.font = '32px Arial';
   ctx.fillText("Score: " + score, 20, 50);
 
-  if (!gameStarted) drawStartButton();
+  if (!gameStarted) drawStartScreen();
   if (gameOverFlag) drawGameOver();
 }
 
@@ -158,11 +179,11 @@ function flap() {
 
 // Reset game
 function resetGame() {
-  bird.y = canvas.height / 3;
+  bird.y = canvas.height / 2;
   bird.velocity = 0;
   pipes = [];
   score = 0;
-  speed = 2;
+  speed = 1.5;
   frame = 0;
   gameOverFlag = false;
 }
@@ -182,13 +203,26 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-document.addEventListener('click', function() {
-  if (!gameStarted) startGame();
-  else if (gameOverFlag) resetGame();
-  else flap();
+document.addEventListener('click', function(e) {
+  if (!gameStarted) {
+    // Kiểm tra click trúng nút Start
+    if (
+      startButton &&
+      e.clientX >= startButton.x &&
+      e.clientX <= startButton.x + startButton.width &&
+      e.clientY >= startButton.y &&
+      e.clientY <= startButton.y + startButton.height
+    ) {
+      startGame();
+    }
+  } else if (gameOverFlag) {
+    resetGame();
+  } else {
+    flap();
+  }
 });
 
-document.addEventListener('touchstart', function() {
+document.addEventListener('touchstart', function(e) {
   if (!gameStarted) startGame();
   else if (gameOverFlag) resetGame();
   else flap();
@@ -197,10 +231,10 @@ document.addEventListener('touchstart', function() {
 window.addEventListener('resize', function() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  bird.y = canvas.height / 3;
+  bird.y = canvas.height / 2;
 });
 
-// Đợi ảnh load xong
+// Đợi ảnh load xong rồi chạy
 function startLoopWhenLoaded() {
   loop();
 }
