@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -33,14 +34,14 @@ let bird = {
 let pipes = [];
 let frame = 0;
 let score = 0;
-let speed = 1.5; // ống di chuyển chậm hơn (trước là 2)
+let speed = 2; // ống di chuyển chậm hơn (trước là 2)
 let gameOverFlag = false;
 let gameStarted = false; // ✅ chưa bấm Start thì không rơi
 
 // Hàm tạo ống
 function createPipe() {
   let top = Math.random() * (canvas.height / 2) + 50;
-  let gap = 440; // ✅ gấp đôi khoảng cách cũ (220 * 2)
+  let gap = 220; // ✅ gấp đôi khoảng cách cũ (220 * 2)
   let bottom = canvas.height - top - gap;
   pipes.push({ x: canvas.width, top: top, bottom: bottom, width: 80 });
 }
@@ -120,7 +121,7 @@ function update() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame > 60 && frame % 120 === 0) createPipe();
+  if (frame > 60 && frame % 180 === 0) createPipe();
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -139,7 +140,7 @@ function update() {
     if (!pipe.scored && pipe.x + pipe.width < bird.x) {
       score++;
       pipe.scored = true;
-      if (score % 5 === 0) speed += 0.2; // tăng tốc nhẹ
+      if (score % 5 === 0) speed += 0.4; // tăng tốc nhẹ
     }
   }
 
