@@ -149,7 +149,7 @@ function update() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame % 200 === 0) createPipe(); // Giãn cách ống xa hơn
+  if (frame % 100 === 0) createPipe(); // Giãn cách ống xa hơn
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -263,3 +263,4 @@ bgImg.onload = checkLoaded;
 </script>
 </body>
 </html>
+
