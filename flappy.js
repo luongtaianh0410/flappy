@@ -29,17 +29,18 @@ let bird = {
   velocity: 0 
 };
 
-// Trò chơi
+// Trạng thái game
 let pipes = [];
 let frame = 0;
 let score = 0;
 let speed = 2;
 let gameOverFlag = false;
+let gameStarted = false; // ✅ để chờ bấm Start
 
 // Hàm tạo ống
 function createPipe() {
   let top = Math.random() * (canvas.height / 2) + 50;
-  let gap = 150;
+  let gap = 220; // ✅ tăng khoảng cách dễ chơi hơn
   let bottom = canvas.height - top - gap;
   pipes.push({ x: canvas.width, top: top, bottom: bottom, width: 80 });
 }
@@ -67,7 +68,18 @@ function drawBackground() {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 }
 
-// Vẽ màn Game Over
+// Vẽ nút Start
+function drawStartButton() {
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = '64px Arial';
+  ctx.fillText("Flappy Bird", canvas.width / 2 - 180, canvas.height / 2 - 80);
+  ctx.font = '32px Arial';
+  ctx.fillText("Click or Press SPACE to Start", canvas.width / 2 - 220, canvas.height / 2);
+}
+
+// Vẽ Game Over
 function drawGameOver() {
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -77,18 +89,18 @@ function drawGameOver() {
   ctx.font = '32px Arial';
   ctx.fillText("Score: " + score, canvas.width / 2 - 60, canvas.height / 2 + 50);
   ctx.font = '24px Arial';
-  ctx.fillText("Press SPACE to restart", canvas.width / 2 - 150, canvas.height / 2 + 100);
+  ctx.fillText("Press SPACE or Click to Restart", canvas.width / 2 - 180, canvas.height / 2 + 100);
 }
 
 // Cập nhật trò chơi
 function update() {
-  if (gameOverFlag) return;
+  if (!gameStarted || gameOverFlag) return;
 
   frame++;
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  if (frame > 60 && frame % 90 === 0) createPipe(); // tạo ống sau 1s
+  if (frame > 60 && frame % 90 === 0) createPipe();
 
   for (let pipe of pipes) {
     pipe.x -= speed;
@@ -107,11 +119,10 @@ function update() {
     if (!pipe.scored && pipe.x + pipe.width < bird.x) {
       score++;
       pipe.scored = true;
-      if (score % 5 === 0) speed += 0.5; // tăng tốc
+      if (score % 5 === 0) speed += 0.5;
     }
   }
 
-  // Chim chạm đất hoặc bay quá cao
   if (bird.y + bird.height > canvas.height || bird.y < 0) {
     hitSound.play();
     gameOverFlag = true;
@@ -126,6 +137,8 @@ function draw() {
   ctx.fillStyle = 'white';
   ctx.font = '32px Arial';
   ctx.fillText("Score: " + score, 20, 50);
+
+  if (!gameStarted) drawStartButton();
   if (gameOverFlag) drawGameOver();
 }
 
@@ -138,6 +151,7 @@ function loop() {
 
 // Bay lên
 function flap() {
+  if (!gameStarted || gameOverFlag) return;
   bird.velocity = bird.lift;
   flapSound.play();
 }
@@ -153,23 +167,31 @@ function resetGame() {
   gameOverFlag = false;
 }
 
+// Bắt đầu game
+function startGame() {
+  gameStarted = true;
+  resetGame();
+}
+
 // Sự kiện điều khiển
 document.addEventListener('keydown', function(e) {
   if (e.code === 'Space') {
-    if (gameOverFlag) {
-      resetGame();
-    } else {
-      flap();
-    }
+    if (!gameStarted) startGame();
+    else if (gameOverFlag) resetGame();
+    else flap();
   }
 });
 
-document.addEventListener('touchstart', function(e) {
-  if (gameOverFlag) {
-    resetGame();
-  } else {
-    flap();
-  }
+document.addEventListener('click', function() {
+  if (!gameStarted) startGame();
+  else if (gameOverFlag) resetGame();
+  else flap();
+});
+
+document.addEventListener('touchstart', function() {
+  if (!gameStarted) startGame();
+  else if (gameOverFlag) resetGame();
+  else flap();
 });
 
 window.addEventListener('resize', function() {
@@ -178,8 +200,8 @@ window.addEventListener('resize', function() {
   bird.y = canvas.height / 3;
 });
 
-// Đợi ảnh load xong rồi mới bắt đầu
-function startGame() {
+// Đợi ảnh load xong
+function startLoopWhenLoaded() {
   loop();
 }
 
@@ -187,7 +209,7 @@ let loaded = 0;
 const totalAssets = 3;
 function checkLoaded() {
   loaded++;
-  if (loaded === totalAssets) startGame();
+  if (loaded === totalAssets) startLoopWhenLoaded();
 }
 
 birdImg.onload = checkLoaded;
